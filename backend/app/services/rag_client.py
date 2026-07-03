@@ -5,7 +5,14 @@ RAG(LLM 추천 설명)는 별도 팀원이 담당한다. 이 모듈은 gateway �
 - Step 12: RAG_SERVER_URL 이 설정되어 있으면 외부 서버로 proxy 하고,
   실패 시 mock 으로 fallback 한다.
 """
+import logging
+
+import requests
+
+from app.config import get_settings
 from app.schemas.rag import RagRequest, RagResponse
+
+logger = logging.getLogger(__name__)
 
 # RAG 서버 미연결 시 반환하는 기본 mock (가이드 §8.2)
 FALLBACK_RESPONSE = RagResponse(
@@ -80,6 +87,30 @@ def build_mock_response(payload: RagRequest) -> RagResponse:
     )
 
 
+def _call_external(url: str, payload: RagRequest, timeout: float) -> RagResponse:
+    """RAG 팀원 서버로 proxy 요청을 보낸다."""
+    resp = requests.post(url, json=payload.model_dump(), timeout=timeout)
+    resp.raise_for_status()
+    data = resp.json()
+    data.setdefault("source", "rag-server")
+    # 서버가 일부 필드를 빠뜨려도 mock 값으로 보완
+    base = build_mock_response(payload).model_dump()
+    base.update({k: v for k, v in data.items() if v is not None})
+    base["source"] = data.get("source", "rag-server")
+    return RagResponse(**base)
+
+
 def get_recommendation(payload: RagRequest) -> RagResponse:
-    """Step 11: 항상 mock 을 반환한다. Step 12에서 외부 연동으로 확장한다."""
-    return build_mock_response(payload)
+    """RAG_SERVER_URL 이 설정되어 있으면 외부 서버로 proxy 하고,
+    실패(미설정·타임아웃·오류)하면 mock 설명으로 fallback 한다.
+    """
+    settings = get_settings()
+    url = settings.rag_server_url.strip()
+    if not url:
+        return build_mock_response(payload)
+
+    try:
+        return _call_external(url, payload, settings.rag_timeout_seconds)
+    except Exception as exc:  # noqa: BLE001 - 어떤 실패든 mock 으로 폴백
+        logger.warning("RAG 서버 호출 실패, mock 으로 fallback: %s", exc)
+        return build_mock_response(payload)
