@@ -173,7 +173,8 @@ def calculate_mobility_feasibility_score(
         - weather_risk * C.W_WEATHER
         - airport_burden * C.W_AIRPORT
     )
-    mobility = _clamp(mobility_raw)
+    # 양수 최대치(70) 기준 0~100 정규화
+    mobility = _clamp(mobility_raw / C.MOBILITY_SCALE * 100)
 
     return {
         "accessibility_score": accessibility,

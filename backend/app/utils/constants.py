@@ -48,5 +48,8 @@ W_ACCESSIBILITY = 0.45
 W_TRANSPORT = 0.25
 W_WEATHER = 0.20
 W_AIRPORT = 0.10
+# 양수 기여분 최대치( = 0.45*100 + 0.25*100 = 70 )로 나눠 0~100 스케일로 정규화한다.
+# 이렇게 하지 않으면 mobility 최대값이 ~70 에 그쳐 recommended(75+) 등급이 뜨지 않는다.
+MOBILITY_SCALE = W_ACCESSIBILITY * 100 + W_TRANSPORT * 100
 LEVEL_RECOMMENDED = 75   # 이상: 추천
 LEVEL_CONDITIONAL = 50   # 이상~미만: 조건부 추천, 미만: 비추천
