@@ -112,3 +112,23 @@ button.primary:disabled {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+input,
+select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+input[type="checkbox"] {
+  width: auto;
+}
