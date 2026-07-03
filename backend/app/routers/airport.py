@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.schemas.airport import AirportPlanRequest, AirportPlanResponse
-from app.services import airport_client, data_loader, itinerary_service
+from app.services import airport_client, data_loader, itinerary_service, jdc_client
 
 router = APIRouter(prefix="/api/airport", tags=["airport"])
 
@@ -37,6 +37,6 @@ def departure_plan(payload: AirportPlanRequest) -> AirportPlanResponse:
         reason=reason,
         airport_floor_maps=airport_client.get_floor_maps(),
         airport_facilities=airport_client.get_facilities(),
-        jdc_stores=[],  # JDC 면세점 매장정보는 /api/jdc 에서 별도 제공 (Step 10)
+        jdc_stores=jdc_client.get_stores(),  # 면세점 매장정보 안내용 (편의시설 아님)
         cautions=BASE_CAUTIONS,
     )

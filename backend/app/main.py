@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import airport, itinerary, recommendations
+from app.routers import airport, itinerary, jdc, recommendations
 
 settings = get_settings()
 
@@ -35,3 +35,4 @@ def health():
 app.include_router(recommendations.router)
 app.include_router(itinerary.router)
 app.include_router(airport.router)
+app.include_router(jdc.router)

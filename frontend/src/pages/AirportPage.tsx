@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AirportFlowPanel from "../components/AirportFlowPanel";
 import AirportFacilityPanel from "../components/AirportFacilityPanel";
+import JdcStorePanel from "../components/JdcStorePanel";
 import { postAirportPlan } from "../api/airport";
 import type { AirportPlan } from "../types/airport";
 
@@ -49,6 +50,7 @@ export default function AirportPage() {
             floorMaps={plan.airport_floor_maps}
           />
           <AirportFacilityPanel facilities={plan.airport_facilities} />
+          <JdcStorePanel stores={plan.jdc_stores} />
           <ul className="notice" style={{ paddingLeft: "1.1rem" }}>
             {plan.cautions.map((c, i) => (
               <li key={i}>{c}</li>
