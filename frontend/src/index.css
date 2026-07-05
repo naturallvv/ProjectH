@@ -1,88 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  /* 여행 앱 감성 — 코랄/오렌지 브랜드 팔레트 */
+  --color-brand-50: #fff7f2;
+  --color-brand-100: #ffe8dc;
+  --color-brand-200: #ffd0b8;
+  --color-brand-300: #ffab85;
+  --color-brand-400: #ff8354;
+  --color-brand-500: #f4633a;
+  --color-brand-600: #e04e28;
+  --color-brand-700: #bb3d1e;
+
+  /* 제주 바다 — 보조 틸 */
+  --color-sea-50: #f0fbfa;
+  --color-sea-100: #d3f4f1;
+  --color-sea-500: #14b8a6;
+  --color-sea-600: #0d9488;
+  --color-sea-700: #0f766e;
+
+  --font-sans: "Pretendard Variable", Pretendard, system-ui,
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  --shadow-soft: 0 2px 12px rgb(0 0 0 / 0.06);
+  --shadow-lift: 0 8px 28px rgb(244 99 58 / 0.14);
+}
+
+/* ── 레거시 변수 (아직 마이그레이션 전 컴포넌트용, 리디자인 완료 후 제거) ── */
 :root {
-  --bg: #f5f7fa;
+  --bg: #fdfaf7;
   --surface: #ffffff;
-  --border: #e2e8f0;
-  --text: #1e293b;
-  --muted: #64748b;
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
+  --border: #f0e7e0;
+  --text: #292524;
+  --muted: #78716c;
+  --primary: #f4633a;
+  --primary-dark: #e04e28;
   --ok: #16a34a;
   --warn: #d97706;
   --danger: #dc2626;
-  font-family: system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  color: var(--text);
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
 }
 
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.brand {
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--primary);
-  text-decoration: none;
-}
-
-.app-nav {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.nav-link {
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.nav-link.active {
-  background: var(--primary);
-  color: #fff;
-}
-
-.app-main {
-  flex: 1;
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
-h1 {
-  font-size: 1.6rem;
-}
-
+/* ── 레거시 컴포넌트 클래스 (마이그레이션 전까지 유지) ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   padding: 1.25rem;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow-soft);
 }
 
 button.primary {
@@ -90,9 +61,11 @@ button.primary {
   color: #fff;
   border: none;
   padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
 }
 
 button.primary:hover {
@@ -124,9 +97,10 @@ input,
 select {
   padding: 0.45rem 0.6rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   font-size: 0.95rem;
   font-family: inherit;
+  background: #fff;
 }
 
 input[type="checkbox"] {
