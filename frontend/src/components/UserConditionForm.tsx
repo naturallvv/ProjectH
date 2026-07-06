@@ -7,10 +7,14 @@ export interface FormValue {
 }
 
 const PREFERRED_OPTIONS = [
-  { value: "indoor", label: "실내" },
-  { value: "nature", label: "자연" },
-  { value: "culture", label: "문화" },
+  { value: "indoor", label: "🏛 실내" },
+  { value: "nature", label: "🌿 자연" },
+  { value: "culture", label: "🎨 문화" },
 ];
+
+const inputCls =
+  "w-full px-3 py-2 rounded-xl border border-brand-100 bg-white text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-brand-300";
+const labelCls = "flex flex-col gap-1 text-xs font-semibold text-stone-500";
 
 export default function UserConditionForm({
   onSubmit,
@@ -49,60 +53,98 @@ export default function UserConditionForm({
   }
 
   return (
-    <form className="card" onSubmit={submit}>
-      <h2 style={{ marginTop: 0 }}>여행 조건 입력</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-        <label>
+    <form
+      onSubmit={submit}
+      className="bg-white rounded-2xl border border-brand-100 p-5 mb-5 shadow-[var(--shadow-soft)]"
+    >
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <label className={labelCls}>
           출발지
-          <input value={startLocation} onChange={(e) => setStartLocation(e.target.value)} />
+          <input
+            className={inputCls}
+            value={startLocation}
+            onChange={(e) => setStartLocation(e.target.value)}
+          />
         </label>
-        <label>
+        <label className={labelCls}>
           여행 날짜
-          <input type="date" value={travelDate} onChange={(e) => setTravelDate(e.target.value)} />
+          <input
+            type="date"
+            className={inputCls}
+            value={travelDate}
+            onChange={(e) => setTravelDate(e.target.value)}
+          />
         </label>
-        <label>
+        <label className={labelCls}>
+          출도 시간
+          <input
+            type="time"
+            className={inputCls}
+            value={departureTime}
+            onChange={(e) => setDepartureTime(e.target.value)}
+          />
+        </label>
+        <label className={labelCls}>
           휠체어 종류
-          <select value={wheelchairType} onChange={(e) => setWheelchairType(e.target.value as WheelchairType)}>
+          <select
+            className={inputCls}
+            value={wheelchairType}
+            onChange={(e) => setWheelchairType(e.target.value as WheelchairType)}
+          >
             <option value="manual">수동</option>
             <option value="electric">전동</option>
             <option value="unknown">미정</option>
           </select>
         </label>
-        <label>
-          출도(출발) 시간
-          <input type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} />
-        </label>
-        <label>
+        <label className={labelCls}>
           날씨 민감도
-          <select value={sensitivity} onChange={(e) => setSensitivity(e.target.value as WeatherSensitivity)}>
+          <select
+            className={inputCls}
+            value={sensitivity}
+            onChange={(e) => setSensitivity(e.target.value as WeatherSensitivity)}
+          >
             <option value="low">낮음</option>
             <option value="normal">보통</option>
             <option value="high">높음</option>
           </select>
         </label>
-        <label style={{ flexDirection: "row", alignItems: "center", gap: "0.4rem", marginTop: "1.4rem" }}>
-          <input type="checkbox" checked={hasCompanion} onChange={(e) => setHasCompanion(e.target.checked)} />
+        <label className="flex flex-row items-center gap-2 text-sm font-medium text-stone-600 mt-5">
+          <input
+            type="checkbox"
+            className="w-4 h-4 accent-brand-500"
+            checked={hasCompanion}
+            onChange={(e) => setHasCompanion(e.target.checked)}
+          />
           동반자 있음
         </label>
       </div>
 
-      <fieldset style={{ border: "none", padding: 0, margin: "0.75rem 0" }}>
-        <legend className="muted" style={{ padding: 0 }}>선호 유형</legend>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          {PREFERRED_OPTIONS.map((opt) => (
-            <label key={opt.value} style={{ flexDirection: "row", alignItems: "center", gap: "0.3rem" }}>
-              <input
-                type="checkbox"
-                checked={preferred.includes(opt.value)}
-                onChange={() => togglePreferred(opt.value)}
-              />
+      <div className="flex flex-wrap items-center gap-2 mt-4">
+        <span className="text-xs font-semibold text-stone-500">선호 유형</span>
+        {PREFERRED_OPTIONS.map((opt) => {
+          const active = preferred.includes(opt.value);
+          return (
+            <button
+              type="button"
+              key={opt.value}
+              onClick={() => togglePreferred(opt.value)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
+                active
+                  ? "bg-brand-500 border-brand-500 text-white"
+                  : "bg-white border-brand-200 text-stone-500 hover:bg-brand-50"
+              }`}
+            >
               {opt.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+            </button>
+          );
+        })}
+      </div>
 
-      <button className="primary" type="submit" disabled={loading}>
+      <button
+        type="submit"
+        disabled={loading}
+        className="mt-5 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-bold text-sm transition-colors cursor-pointer"
+      >
         {loading ? "분석 중…" : "이동가능성 추천 받기"}
       </button>
     </form>

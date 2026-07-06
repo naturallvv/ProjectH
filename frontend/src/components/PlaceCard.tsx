@@ -2,71 +2,98 @@ import type { PlaceFacts, Recommendation } from "../types/place";
 import ScoreBadge from "./ScoreBadge";
 
 const FACT_LABELS: Record<keyof PlaceFacts, string> = {
-  has_accessible_parking: "장애인 주차장",
-  has_accessible_toilet: "장애인 화장실",
+  has_accessible_parking: "주차장",
+  has_accessible_toilet: "화장실",
   has_wheelchair_rental: "휠체어 대여",
-  is_indoor: "실내 관광지",
+  is_indoor: "실내",
 };
 
-function factText(value: boolean | null): { text: string; color: string } {
-  if (value === true) return { text: "있음", color: "var(--ok)" };
-  if (value === false) return { text: "없음", color: "var(--danger)" };
-  return { text: "정보 없음", color: "var(--muted)" };
+function factChip(value: boolean | null): { mark: string; cls: string } {
+  if (value === true) return { mark: "✓", cls: "bg-green-50 text-green-700 border-green-200" };
+  if (value === false) return { mark: "✕", cls: "bg-red-50 text-red-500 border-red-200" };
+  return { mark: "?", cls: "bg-stone-50 text-stone-400 border-stone-200" };
 }
 
-function ScoreRow({ label, value }: { label: string; value: number }) {
+function scoreColor(level: Recommendation["recommendation_level"]): string {
+  if (level === "recommended") return "text-green-600";
+  if (level === "conditional") return "text-amber-600";
+  return "text-red-500";
+}
+
+function MiniBar({ label, value, inverted = false }: { label: string; value: number; inverted?: boolean }) {
+  const good = inverted ? value <= 30 : value >= 60;
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
-      <span className="muted">{label}</span>
-      <strong>{value}</strong>
+    <div className="flex items-center gap-2 text-xs">
+      <span className="w-16 shrink-0 text-stone-400">{label}</span>
+      <div className="flex-1 h-1.5 rounded-full bg-stone-100 overflow-hidden">
+        <div
+          className={`h-full rounded-full ${good ? "bg-sea-500" : "bg-brand-400"}`}
+          style={{ width: `${value}%` }}
+        />
+      </div>
+      <span className="w-7 text-right font-semibold text-stone-600">{value}</span>
     </div>
   );
 }
 
 export default function PlaceCard({ rec }: { rec: Recommendation }) {
+  const warnings = rec.warnings.filter((w) => !w.startsWith("본 추천은 참고 정보"));
+
   return (
-    <div className="card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0 }}>{rec.name}</h3>
-        <ScoreBadge level={rec.recommendation_level} />
+    <div className="bg-white rounded-2xl border border-brand-100 p-5 mb-3 shadow-[var(--shadow-soft)]">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="m-0 text-lg font-bold text-stone-800">{rec.name}</h3>
+            <ScoreBadge level={rec.recommendation_level} />
+          </div>
+          <p className="m-0 mt-1 text-xs text-stone-400">
+            {rec.category === "indoor" ? "🏛 실내" : "🌿 실외"}
+          </p>
+        </div>
+        <div className="text-right shrink-0">
+          <div className={`text-3xl font-extrabold leading-none ${scoreColor(rec.recommendation_level)}`}>
+            {rec.mobility_feasibility_score}
+          </div>
+          <div className="text-[10px] text-stone-400 mt-1">이동가능성</div>
+        </div>
       </div>
-      <p className="muted" style={{ margin: "0.25rem 0 0.75rem" }}>
-        {rec.category === "indoor" ? "실내" : "실외"} · 이동가능성 {rec.mobility_feasibility_score}점
-      </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.25rem 1.5rem" }}>
-        <ScoreRow label="접근성" value={rec.accessibility_score} />
-        <ScoreRow label="날씨 위험도" value={rec.weather_risk_score} />
-        <ScoreRow label="교통" value={rec.transport_score} />
-        <ScoreRow label="공항 부담" value={rec.airport_burden_score} />
-      </div>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", margin: "0.75rem 0" }}>
+      {/* 사실 칩 — 정보 없음(?)도 그대로 표기 */}
+      <div className="flex flex-wrap gap-1.5 mt-3">
         {(Object.keys(FACT_LABELS) as (keyof PlaceFacts)[]).map((key) => {
-          const f = factText(rec.facts[key]);
+          const c = factChip(rec.facts[key]);
           return (
             <span
               key={key}
-              style={{
-                fontSize: "0.8rem",
-                border: "1px solid var(--border)",
-                borderRadius: "0.4rem",
-                padding: "0.15rem 0.5rem",
-              }}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-xs font-medium ${c.cls}`}
             >
-              {FACT_LABELS[key]}: <span style={{ color: f.color }}>{f.text}</span>
+              <span>{c.mark}</span>
+              {FACT_LABELS[key]}
+              {rec.facts[key] === null && <span className="font-normal">(정보 없음)</span>}
             </span>
           );
         })}
       </div>
 
-      {rec.warnings.length > 0 && (
-        <ul className="notice" style={{ margin: 0, paddingLeft: "1.1rem" }}>
-          {rec.warnings.map((w, i) => (
-            <li key={i}>{w}</li>
-          ))}
-        </ul>
-      )}
+      <details className="mt-3 group">
+        <summary className="cursor-pointer list-none text-xs font-semibold text-brand-500 hover:text-brand-600 select-none">
+          자세히 보기 <span className="inline-block transition-transform group-open:rotate-180">▾</span>
+        </summary>
+        <div className="mt-3 space-y-1.5">
+          <MiniBar label="접근성" value={rec.accessibility_score} />
+          <MiniBar label="교통" value={rec.transport_score} />
+          <MiniBar label="날씨 위험" value={rec.weather_risk_score} inverted />
+          <MiniBar label="공항 부담" value={rec.airport_burden_score} inverted />
+        </div>
+        {warnings.length > 0 && (
+          <ul className="mt-3 mb-0 pl-4 space-y-0.5 text-xs text-stone-500">
+            {warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
+        )}
+      </details>
     </div>
   );
 }

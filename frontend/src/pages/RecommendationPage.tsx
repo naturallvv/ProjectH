@@ -36,19 +36,23 @@ export default function RecommendationPage() {
         setRag(null);
       }
     } catch {
-      setError("추천 결과를 불러오지 못했습니다. 백엔드 서버(localhost:8000)가 실행 중인지 확인하세요.");
+      setError("추천 결과를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div>
-      <h1>관광지 추천</h1>
+    <div className="max-w-2xl mx-auto">
+      <h1 className="text-2xl font-extrabold text-stone-900 mb-1">관광지 추천</h1>
+      <p className="text-sm text-stone-400 mt-0 mb-5">
+        조건을 입력하면 오늘 이동 가능한 곳을 점수 순으로 보여드려요.
+      </p>
+
       <UserConditionForm onSubmit={handleSubmit} loading={loading} />
 
       {error && (
-        <div className="card" style={{ borderColor: "var(--danger)", color: "var(--danger)" }}>
+        <div className="rounded-2xl border border-red-200 bg-red-50 text-red-600 text-sm p-4 mb-4">
           {error}
         </div>
       )}
@@ -57,12 +61,13 @@ export default function RecommendationPage() {
 
       {recs && recs.length > 0 && (
         <>
-          <p className="notice">
-            이동가능성 점수가 높은 순으로 정렬했습니다. 확인되지 않은 정보는 "정보 없음"으로 표시됩니다.
-          </p>
           {recs.map((rec) => (
             <PlaceCard key={rec.place_id} rec={rec} />
           ))}
+          <p className="text-xs text-stone-400 mt-4">
+            ※ 본 추천은 참고 정보이며 휠체어 접근 가능성이나 안전을 보장하지 않습니다. 확인되지
+            않은 정보는 "정보 없음"으로 표시됩니다.
+          </p>
         </>
       )}
     </div>
