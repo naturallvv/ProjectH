@@ -14,29 +14,41 @@ const SOURCES: { name: string; url: string }[] = [
 
 export default function DataSourceFooter() {
   return (
-    <footer
-      style={{
-        borderTop: "1px solid var(--border)",
-        background: "var(--surface)",
-        padding: "1rem 1.5rem",
-        fontSize: "0.8rem",
-        color: "var(--muted)",
-      }}
-    >
-      <strong>데이터 출처</strong>
-      <ul style={{ margin: "0.5rem 0", paddingLeft: "1.2rem", columns: 2 }}>
-        {SOURCES.map((s) => (
-          <li key={s.url}>
-            <a href={s.url} target="_blank" rel="noreferrer" style={{ color: "var(--muted)" }}>
-              {s.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-      <p style={{ margin: 0 }}>
-        ※ JDC 데이터는 면세점 매장정보 안내에만 사용합니다. 공항 편의시설·동선은 한국공항공사 데이터를
-        사용하며, 확인되지 않은 정보는 표시하지 않습니다.
-      </p>
+    <footer className="border-t border-brand-100 bg-white">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
+        <details className="group">
+          <summary className="cursor-pointer list-none flex items-center justify-between text-xs text-stone-400 select-none">
+            <span>
+              <strong className="text-stone-500">WheelTrip Jeju</strong> · 공공데이터{" "}
+              {SOURCES.length}종 기반
+            </span>
+            <span className="font-semibold text-brand-400 hover:text-brand-500">
+              데이터 출처 보기{" "}
+              <span className="inline-block transition-transform group-open:rotate-180">▾</span>
+            </span>
+          </summary>
+
+          <ul className="mt-3 mb-0 pl-4 columns-1 sm:columns-2 text-xs text-stone-400 space-y-0.5">
+            {SOURCES.map((s) => (
+              <li key={s.url}>
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-stone-400 hover:text-brand-500 no-underline"
+                >
+                  {s.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 mb-0 text-[11px] text-stone-300">
+            ※ JDC 데이터는 면세점 매장정보 안내에만 사용합니다. 공항 편의시설·동선은
+            한국공항공사 데이터를 사용하며, 확인되지 않은 정보는 표시하지 않습니다. 본 서비스의
+            추천 결과는 참고 정보이며 접근 가능성과 안전을 보장하지 않습니다.
+          </p>
+        </details>
+      </div>
     </footer>
   );
 }
