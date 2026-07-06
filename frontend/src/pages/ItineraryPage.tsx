@@ -15,22 +15,23 @@ export default function ItineraryPage() {
     try {
       setItinerary(await postItinerary(value.profile, value.travelDate));
     } catch {
-      setError("일정을 불러오지 못했습니다. 백엔드 서버(localhost:8000)를 확인하세요.");
+      setError("일정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div>
-      <h1>날씨 기반 일정 재구성</h1>
-      <p className="muted">
-        기상 위험이 높으면 실외 일정을 실내로 대체하고 공항 조기 이동을 권장합니다.
+    <div className="max-w-2xl mx-auto">
+      <h1 className="text-2xl font-extrabold text-stone-900 mb-1">오늘의 일정</h1>
+      <p className="text-sm text-stone-400 mt-0 mb-5">
+        기상이 나쁘면 실외 일정을 실내로 바꾸고 공항 조기 이동을 알려드려요.
       </p>
+
       <UserConditionForm onSubmit={handleSubmit} loading={loading} />
 
       {error && (
-        <div className="card" style={{ borderColor: "var(--danger)", color: "var(--danger)" }}>
+        <div className="rounded-2xl border border-red-200 bg-red-50 text-red-600 text-sm p-4 mb-4">
           {error}
         </div>
       )}
