@@ -1,36 +1,43 @@
 import type { AirportFacility } from "../types/airport";
 
+const CATEGORY_ICON: Record<string, string> = {
+  편의점: "🏪",
+  카페: "☕",
+  은행: "🏦",
+  식당: "🍽️",
+  약국: "💊",
+};
+
 export default function AirportFacilityPanel({
   facilities,
 }: {
   facilities: AirportFacility[];
 }) {
   return (
-    <section>
-      <h2>공항 내 체류 가능 시설</h2>
-      <p className="notice">카페·편의점·은행 등 출도 전 이용 가능한 시설입니다. (한국공항공사 층별 입점업체 현황)</p>
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
-          <thead>
-            <tr style={{ background: "#f8fafc", textAlign: "left" }}>
-              <th style={{ padding: "0.6rem" }}>시설</th>
-              <th style={{ padding: "0.6rem" }}>구분</th>
-              <th style={{ padding: "0.6rem" }}>위치</th>
-            </tr>
-          </thead>
-          <tbody>
-            {facilities.map((f, i) => (
-              <tr key={i} style={{ borderTop: "1px solid var(--border)" }}>
-                <td style={{ padding: "0.6rem" }}>{f.facility_name}</td>
-                <td style={{ padding: "0.6rem" }}>{f.category}</td>
-                <td style={{ padding: "0.6rem" }}>
-                  {f.terminal} {f.floor}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <section className="mt-8">
+      <h2 className="text-lg font-extrabold text-stone-900 mb-1">체류 가능 시설</h2>
+      <p className="text-xs text-stone-400 mt-0 mb-3">
+        출도 전 이용할 수 있는 공항 내 시설이에요.
+      </p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {facilities.map((f, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 bg-white rounded-2xl border border-brand-100 p-3.5 shadow-[var(--shadow-soft)]"
+          >
+            <span className="text-2xl">{CATEGORY_ICON[f.category] ?? "📍"}</span>
+            <div className="min-w-0">
+              <div className="font-bold text-sm text-stone-800 truncate">{f.facility_name}</div>
+              <div className="text-[11px] text-stone-400">
+                {f.terminal} {f.floor} · {f.category}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+      <p className="text-[10px] text-stone-300 mt-2">
+        출처: 한국공항공사 제주공항 층별 입점업체 현황
+      </p>
     </section>
   );
 }
