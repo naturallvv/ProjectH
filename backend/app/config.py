@@ -16,10 +16,15 @@ class Settings(BaseSettings):
     rag_server_url: str = ""
     rag_timeout_seconds: float = 5.0
 
-    # 공공데이터 API 키 (Step 14 실연동용, 현재 미사용)
+    # 공공데이터 API 키 (Step 14 실연동)
     kma_api_key: str = ""
     jdc_api_key: str = ""
     data_go_kr_api_key: str = ""
+
+    # JDC 면세점 매장정보 API (data.go.kr B551391). serviceKey 는 Decoding 키.
+    # 제공기관 공지에 따른 변경 후 URL(복수형). 구 URL(jdcdutyfreeshop/brands)은 90일 후 중지.
+    jdc_api_url: str = "https://apis.data.go.kr/B551391/jdcdutyfreeshops"
+    public_api_timeout_seconds: float = 10.0
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
