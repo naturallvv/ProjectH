@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AirportKakaoMap from "../components/AirportKakaoMap";
 import AirportFlowPanel from "../components/AirportFlowPanel";
 import AirportFacilityPanel from "../components/AirportFacilityPanel";
 import JdcStorePanel from "../components/JdcStorePanel";
@@ -29,6 +30,8 @@ export default function AirportPage() {
       <p className="text-sm text-stone-400 mt-0 mb-5">
         출발 시간만 알려주시면 도착 시간부터 공항 안 동선까지 안내해 드려요.
       </p>
+
+      <AirportKakaoMap />
 
       <div className="flex items-end gap-3 bg-white rounded-2xl border border-brand-100 p-5 mb-6 shadow-[var(--shadow-soft)]">
         <label className="flex flex-col gap-1 text-xs font-semibold text-stone-500">
