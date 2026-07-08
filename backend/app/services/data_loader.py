@@ -7,7 +7,9 @@ import json
 from functools import lru_cache
 from typing import Any
 
-from app.config import MOCK_DIR
+from app.config import BASE_DIR, MOCK_DIR
+
+PROCESSED_DIR = BASE_DIR / "data" / "processed"
 
 
 def _load_json(filename: str) -> Any:
@@ -18,6 +20,14 @@ def _load_json(filename: str) -> Any:
 
 @lru_cache
 def load_places() -> list[dict]:
+    """관광지 목록. 실데이터(data/processed/jeju_places.json)가 있으면 우선 사용,
+    없으면 mock 으로 fallback."""
+    real = PROCESSED_DIR / "jeju_places.json"
+    if real.exists():
+        with real.open(encoding="utf-8") as f:
+            data = json.load(f)
+        if data:
+            return data
     return _load_json("mock_places.json")
 
 

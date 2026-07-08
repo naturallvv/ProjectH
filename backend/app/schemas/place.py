@@ -18,6 +18,8 @@ class Recommendation(BaseModel):
     place_id: str
     name: str
     category: str
+    address: str | None = None
+    image_urls: list[str] = []
     accessibility_score: int
     weather_risk_score: int
     transport_score: int

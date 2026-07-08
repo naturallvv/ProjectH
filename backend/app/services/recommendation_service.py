@@ -35,6 +35,8 @@ def build_recommendations(
                 place_id=place["id"],
                 name=place["name"],
                 category=place["category"],
+                address=place.get("address"),
+                image_urls=place.get("image_urls", []),
                 warnings=_build_warnings(place, scores["recommendation_level"]),
                 facts=PlaceFacts(
                     has_accessible_parking=place.get("has_accessible_parking"),
