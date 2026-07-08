@@ -11,7 +11,7 @@ from app.schemas.itinerary import (
     WeatherSummary,
 )
 from app.schemas.user import UserProfile
-from app.services import data_loader, recommendation_service
+from app.services import recommendation_service, weather_client
 from app.utils import constants as C
 
 
@@ -36,7 +36,7 @@ def is_weather_risky(weather: dict) -> bool:
 def build_itinerary(
     user_profile: UserProfile, travel_date: str | None = None
 ) -> ItineraryResponse:
-    weather = data_loader.load_weather()
+    weather = weather_client.get_weather()
     risky = is_weather_risky(weather)
 
     recs = recommendation_service.build_recommendations(user_profile, travel_date)

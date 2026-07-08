@@ -26,6 +26,17 @@ class Settings(BaseSettings):
     jdc_api_url: str = "https://apis.data.go.kr/B551391/jdcdutyfreeshops"
     public_api_timeout_seconds: float = 10.0
 
+    # 기상청(1360000) — 단기예보 + 기상특보. serviceKey 는 위 인증키 공용.
+    kma_forecast_url: str = (
+        "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst"
+    )
+    kma_alert_url: str = (
+        "https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList"
+    )
+    kma_grid_nx: int = 52   # 제주시 격자 X
+    kma_grid_ny: int = 38   # 제주시 격자 Y
+    kma_stn_id: int = 184   # 제주 특보 지점코드
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",

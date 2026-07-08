@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.schemas.airport import AirportPlanRequest, AirportPlanResponse
-from app.services import airport_client, data_loader, itinerary_service, jdc_client
+from app.services import airport_client, itinerary_service, jdc_client, weather_client
 
 router = APIRouter(prefix="/api/airport", tags=["airport"])
 
@@ -17,7 +17,7 @@ def departure_plan(payload: AirportPlanRequest) -> AirportPlanResponse:
     weather = (
         payload.weather_summary.model_dump()
         if payload.weather_summary
-        else data_loader.load_weather()
+        else weather_client.get_weather()
     )
     risky = itinerary_service.is_weather_risky(weather)
 
