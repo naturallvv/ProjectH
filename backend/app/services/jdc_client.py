@@ -53,6 +53,14 @@ def _find_store_rows(payload) -> list[dict]:
     return found
 
 
+def _fmt_time(v) -> str | None:
+    """"0600" → "06:00", "2120" → "21:20". 파싱 불가/빈값이면 None."""
+    s = str(v).strip()
+    if len(s) == 4 and s.isdigit():
+        return f"{s[:2]}:{s[2:]}"
+    return None
+
+
 def _map_row(row: dict) -> JdcStore:
     loc = " ".join(
         str(row[k]).strip()
@@ -63,9 +71,9 @@ def _map_row(row: dict) -> JdcStore:
         store_name=row.get("POS_NM") or row.get("STOR_CD") or "JDC 면세점 매장",
         location=loc or "제주국제공항 JDC면세점 구역",
         category=row.get("POS_BRAN_NM"),  # 판매품목
-        # 변경 후 API 에 추가된 매장시작/종료시간. 없으면 정보 없음 유지(임의 값 넣지 않음).
-        open_time=row.get("POS_START_TIME") or None,
-        close_time=row.get("POS_END_TIME") or None,
+        # 변경 후 API 에 추가된 매장시작/종료시간(HHMM). 없으면 정보 없음 유지.
+        open_time=_fmt_time(row.get("POS_START_TIME")),
+        close_time=_fmt_time(row.get("POS_END_TIME")),
         phone=row.get("TEL_NO"),
         source=API_SOURCE,
         data_limit=STORE_DATA_LIMIT,

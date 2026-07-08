@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     data_go_kr_api_key: str = ""
 
     # JDC 면세점 매장정보 API (data.go.kr B551391). serviceKey 는 Decoding 키.
-    # 제공기관 공지에 따른 변경 후 URL(복수형). 구 URL(jdcdutyfreeshop/brands)은 90일 후 중지.
-    jdc_api_url: str = "https://apis.data.go.kr/B551391/jdcdutyfreeshops"
+    # 변경 후 URL(복수형 base) + /brand 오퍼레이션. 129개 매장, 운영시간 포함.
+    jdc_api_url: str = "https://apis.data.go.kr/B551391/jdcdutyfreeshops/brand"
     public_api_timeout_seconds: float = 10.0
 
     # 기상청(1360000) — 단기예보 + 기상특보. serviceKey 는 위 인증키 공용.
