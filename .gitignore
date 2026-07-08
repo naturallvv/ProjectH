@@ -25,3 +25,6 @@ backend/data/processed/
 
 # 데모용 mock 데이터는 커밋 허용
 !backend/data/mock/
+
+# JDC 폴링 로그
+backend/jdc_poll.log
