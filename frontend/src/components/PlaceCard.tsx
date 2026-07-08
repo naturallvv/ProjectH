@@ -39,8 +39,25 @@ function MiniBar({ label, value, inverted = false }: { label: string; value: num
 export default function PlaceCard({ rec }: { rec: Recommendation }) {
   const warnings = rec.warnings.filter((w) => !w.startsWith("본 추천은 참고 정보"));
 
+  const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
+  const rawImg = rec.image_urls?.[0];
+  // 제주 GIS 이미지는 인증서 문제로 백엔드 프록시를 통해 로드
+  const heroImg = rawImg ? `${API_BASE}/api/image?url=${encodeURIComponent(rawImg)}` : undefined;
+
   return (
-    <div className="bg-white rounded-2xl border border-brand-100 p-5 mb-3 shadow-[var(--shadow-soft)]">
+    <div className="bg-white rounded-2xl border border-brand-100 mb-3 shadow-[var(--shadow-soft)] overflow-hidden">
+      {heroImg && (
+        <img
+          src={heroImg}
+          alt={`${rec.name} 로드뷰`}
+          loading="lazy"
+          className="w-full h-40 object-cover bg-stone-100"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      )}
+      <div className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -49,6 +66,7 @@ export default function PlaceCard({ rec }: { rec: Recommendation }) {
           </div>
           <p className="m-0 mt-1 text-xs text-stone-400">
             {rec.category === "indoor" ? "🏛 실내" : "🌿 실외"}
+            {rec.address ? ` · ${rec.address}` : ""}
           </p>
         </div>
         <div className="text-right shrink-0">
@@ -94,6 +112,7 @@ export default function PlaceCard({ rec }: { rec: Recommendation }) {
           </ul>
         )}
       </details>
+      </div>
     </div>
   );
 }

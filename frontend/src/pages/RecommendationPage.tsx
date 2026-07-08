@@ -61,7 +61,10 @@ export default function RecommendationPage() {
 
       {recs && recs.length > 0 && (
         <>
-          {recs.map((rec) => (
+          <p className="text-xs text-stone-400 mb-2">
+            총 {recs.length}곳 중 이동가능성 상위 {Math.min(recs.length, 24)}곳
+          </p>
+          {recs.slice(0, 24).map((rec) => (
             <PlaceCard key={rec.place_id} rec={rec} />
           ))}
           <p className="text-xs text-stone-400 mt-4">

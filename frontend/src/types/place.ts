@@ -14,6 +14,8 @@ export interface Recommendation {
   place_id: string;
   name: string;
   category: string;
+  address?: string | null;
+  image_urls?: string[];
   accessibility_score: number;
   weather_risk_score: number;
   transport_score: number;
