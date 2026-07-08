@@ -102,8 +102,17 @@ def fetch_forecast() -> dict:
     }
 
 
+def _clean_alert(title: str) -> str | None:
+    """"[특보] 제07-23호 : 2026.07.08.10:00 / 폭염주의보 발표 (*)" → "폭염주의보".
+    해제된 특보면 None."""
+    part = title.split("/")[-1].strip()  # "폭염주의보 발표 (*)"
+    if "해제" in part:
+        return None
+    return part.replace("발표", "").replace("(*)", "").strip() or None
+
+
 def fetch_alert() -> str | None:
-    """제주 지역 현행 기상특보 문구. 없거나 실패면 None."""
+    """제주 지역 현행 기상특보(발표 중) 문구. 없거나 실패면 None."""
     s = get_settings()
     today = datetime.now().strftime("%Y%m%d")
     frm = (datetime.now() - timedelta(days=2)).strftime("%Y%m%d")
@@ -112,7 +121,7 @@ def fetch_alert() -> str | None:
         params={
             "serviceKey": s.kma_api_key,
             "pageNo": 1,
-            "numOfRows": 10,
+            "numOfRows": 20,
             "dataType": "JSON",
             "stnId": s.kma_stn_id,
             "fromTmFc": frm,
@@ -122,10 +131,13 @@ def fetch_alert() -> str | None:
     )
     r.raise_for_status()
     items = r.json()["response"]["body"]["items"]["item"]
-    if not items:
-        return None
-    latest = items[0]
-    return latest.get("title") or latest.get("t6") or None
+    items = items if isinstance(items, list) else [items]
+    # 최신순(tmFc 내림차순)으로 첫 '발표' 특보를 채택
+    for it in sorted(items, key=lambda x: x.get("tmFc", 0), reverse=True):
+        alert = _clean_alert(it.get("title", ""))
+        if alert:
+            return alert
+    return None
 
 
 def get_weather() -> dict:
@@ -140,7 +152,11 @@ def get_weather() -> dict:
     try:
         weather = fetch_forecast()
         try:
-            weather["weather_alert"] = fetch_alert()
+            alert = fetch_alert()
+            weather["weather_alert"] = alert
+            # 폭염특보가 있으면 heat_risk 상향 (기온 집계만으로는 놓칠 수 있음)
+            if alert and "폭염" in alert:
+                weather["heat_risk"] = "danger" if "경보" in alert else "warning"
         except Exception as exc:  # noqa: BLE001 - 특보 실패는 예보만으로 진행
             logger.warning("기상특보 조회 실패: %s", exc)
         _CACHE.update(data=weather, ts=time.time())
