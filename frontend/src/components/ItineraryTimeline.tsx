@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import type { Itinerary } from "../types/itinerary";
 import PlaceMap, { type MapMarker } from "./PlaceMap";
+import { postRoute, type RouteResponse } from "../api/route";
+import { JEJU_AIRPORT } from "../lib/kakao";
 
 const PERIOD_ICON: Record<string, string> = {
   morning: "🌅",
@@ -22,13 +25,43 @@ export default function ItineraryTimeline({ itinerary }: { itinerary: Itinerary 
       order: i + 1,
     }));
 
+  // 실도로 경로 조회 (관광지 순서 + 공항)
+  const [route, setRoute] = useState<RouteResponse | null>(null);
+  useEffect(() => {
+    if (markers.length === 0) {
+      setRoute(null);
+      return;
+    }
+    const points = [
+      ...markers.map((m) => ({ lat: m.lat, lng: m.lng })),
+      { lat: JEJU_AIRPORT.lat, lng: JEJU_AIRPORT.lng },
+    ];
+    postRoute(points)
+      .then(setRoute)
+      .catch(() => setRoute(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itinerary]);
+
   return (
     <div>
       {markers.length > 0 && (
         <div className="mb-4">
-          <PlaceMap markers={markers} connect showAirport height="20rem" />
+          <PlaceMap
+            markers={markers}
+            connect
+            routePath={route?.source === "kakao" ? route.path : undefined}
+            showAirport
+            height="20rem"
+          />
           <p className="text-[11px] text-stone-400 mt-1">
-            숫자 = 방문 순서 · 점선 = 이동 동선(직선) · ✈ = 공항
+            숫자 = 방문 순서 · ✈ = 공항
+            {route?.source === "kakao" && route.distance_m != null && (
+              <span className="text-brand-500 font-semibold">
+                {" "}
+                · 총 이동 {(route.distance_m / 1000).toFixed(1)}km ·{" "}
+                {Math.round((route.duration_s ?? 0) / 60)}분 (실도로)
+              </span>
+            )}
           </p>
         </div>
       )}

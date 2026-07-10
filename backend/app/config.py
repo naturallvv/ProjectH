@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     kma_grid_ny: int = 38   # 제주시 격자 Y
     kma_stn_id: int = 184   # 제주 특보 지점코드
 
+    # 카카오 모빌리티 길찾기 (REST 키). 없으면 프론트가 직선 동선으로 표시.
+    kakao_rest_key: str = ""
+    kakao_directions_url: str = (
+        "https://apis-navi.kakaomobility.com/v1/waypoints/directions"
+    )
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",

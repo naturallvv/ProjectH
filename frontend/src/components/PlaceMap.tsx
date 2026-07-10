@@ -23,12 +23,14 @@ function pin(color: string, order?: number) {
 export default function PlaceMap({
   markers,
   connect = false,
+  routePath,
   showAirport = true,
   showLegend = false,
   height = "18rem",
 }: {
   markers: MapMarker[];
-  connect?: boolean; // order 순서대로 선 연결 (일정 동선)
+  connect?: boolean; // order 순서대로 직선 연결 (일정 동선)
+  routePath?: { lat: number; lng: number }[]; // 실도로 경로 (있으면 직선 대신 이걸 그림)
   showAirport?: boolean;
   showLegend?: boolean;
   height?: string;
@@ -79,7 +81,20 @@ export default function PlaceMap({
           });
         }
 
-        if (connect && pts.length > 1) {
+        if (routePath && routePath.length > 1) {
+          // 실도로 경로 (실선)
+          const path = routePath.map((p) => new kakao.maps.LatLng(p.lat, p.lng));
+          path.forEach((ll: any) => bounds.extend(ll));
+          new kakao.maps.Polyline({
+            map,
+            path,
+            strokeWeight: 4,
+            strokeColor: "#f4633a",
+            strokeOpacity: 0.9,
+            strokeStyle: "solid",
+          });
+        } else if (connect && pts.length > 1) {
+          // 실도로 경로가 없을 때 직선(점선)
           const path = [...pts]
             .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
             .map((m) => new kakao.maps.LatLng(m.lat, m.lng));
@@ -100,7 +115,7 @@ export default function PlaceMap({
     return () => {
       cancelled = true;
     };
-  }, [markers, connect, showAirport]);
+  }, [markers, connect, showAirport, routePath]);
 
   if (error === "no-key") return null; // 키 없으면 지도 생략
   if (markers.filter((m) => m.lat && m.lng).length === 0) return null;
