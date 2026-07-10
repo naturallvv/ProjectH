@@ -1,11 +1,15 @@
 import type { AirportFacility } from "../types/airport";
 
 const CATEGORY_ICON: Record<string, string> = {
+  식음료: "🍽️",
+  금융: "🏦",
+  안내: "ℹ️",
+  판매: "🛍️",
+  면세점: "🛒",
+  라운지: "🛋️",
+  기타서비스: "🔧",
   편의점: "🏪",
   카페: "☕",
-  은행: "🏦",
-  식당: "🍽️",
-  약국: "💊",
 };
 
 export default function AirportFacilityPanel({

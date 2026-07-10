@@ -1,4 +1,5 @@
 import type { FloorMap } from "../types/airport";
+import AirportFloorMapViewer from "./AirportFloorMapViewer";
 
 export default function AirportFlowPanel({
   arrivalTime,
@@ -20,24 +21,8 @@ export default function AirportFlowPanel({
         <p className="m-0 mt-2 text-xs text-white/80 max-w-md mx-auto">{reason}</p>
       </div>
 
-      {/* 층별 도면 */}
-      <h2 className="text-lg font-extrabold text-stone-900 mb-3">공항 층별 도면</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {floorMaps.map((m) => (
-          <div
-            key={m.floor}
-            className="bg-white rounded-2xl border border-brand-100 p-3 shadow-[var(--shadow-soft)]"
-          >
-            <div className="grid place-items-center h-20 rounded-xl bg-sea-50 border border-dashed border-sea-100 font-extrabold text-sea-600">
-              {m.floor}
-            </div>
-            <p className="m-0 mt-2 text-xs text-stone-500">{m.description}</p>
-          </div>
-        ))}
-      </div>
-      <p className="text-[10px] text-stone-300 mt-2">
-        출처: 한국공항공사 제주국제공항 도면 이미지 정보 (동선 참고용)
-      </p>
+      {/* 실제 층별 도면 뷰어 (탭 + 줌) */}
+      <AirportFloorMapViewer floorMaps={floorMaps} />
     </section>
   );
 }
