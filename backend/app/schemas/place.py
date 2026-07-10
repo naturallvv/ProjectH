@@ -19,6 +19,8 @@ class Recommendation(BaseModel):
     name: str
     category: str
     address: str | None = None
+    lat: float | None = None
+    lon: float | None = None
     image_urls: list[str] = []
     accessibility_score: int
     weather_risk_score: int

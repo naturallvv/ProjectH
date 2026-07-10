@@ -1,4 +1,5 @@
 import type { Itinerary } from "../types/itinerary";
+import PlaceMap, { type MapMarker } from "./PlaceMap";
 
 const PERIOD_ICON: Record<string, string> = {
   morning: "🌅",
@@ -9,8 +10,28 @@ const PERIOD_ICON: Record<string, string> = {
 
 export default function ItineraryTimeline({ itinerary }: { itinerary: Itinerary }) {
   const w = itinerary.weather_summary;
+
+  // 장소가 있는 슬롯을 순서대로 마커화 (동선)
+  const markers: MapMarker[] = itinerary.slots
+    .filter((s) => s.lat != null && s.lon != null && s.place_name)
+    .map((s, i) => ({
+      lat: s.lat as number,
+      lng: s.lon as number,
+      label: `${s.place_name}`,
+      color: "#f4633a",
+      order: i + 1,
+    }));
+
   return (
     <div>
+      {markers.length > 0 && (
+        <div className="mb-4">
+          <PlaceMap markers={markers} connect showAirport height="20rem" />
+          <p className="text-[11px] text-stone-400 mt-1">
+            숫자 = 방문 순서 · 점선 = 이동 동선(직선) · ✈ = 공항
+          </p>
+        </div>
+      )}
       {/* 기상 + 조기 이동 요약 배너 */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="flex-1 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">

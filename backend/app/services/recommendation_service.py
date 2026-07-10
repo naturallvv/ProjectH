@@ -36,6 +36,8 @@ def build_recommendations(
                 name=place["name"],
                 category=place["category"],
                 address=place.get("address"),
+                lat=place.get("lat"),
+                lon=place.get("lon"),
                 image_urls=place.get("image_urls", []),
                 warnings=_build_warnings(place, scores["recommendation_level"]),
                 facts=PlaceFacts(

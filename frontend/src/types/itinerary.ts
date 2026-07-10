@@ -10,6 +10,8 @@ export interface ItinerarySlot {
   title: string;
   place_name: string | null;
   category: string | null;
+  lat?: number | null;
+  lon?: number | null;
   reason: string;
   is_alternative: boolean;
 }

@@ -1,11 +1,30 @@
 import { useState } from "react";
 import UserConditionForm, { type FormValue } from "../components/UserConditionForm";
 import PlaceCard from "../components/PlaceCard";
+import PlaceMap, { type MapMarker } from "../components/PlaceMap";
 import RagExplanationBox from "../components/RagExplanationBox";
+import type { RecommendationLevel } from "../types/place";
 import { postRecommendations } from "../api/recommendation";
 import { postRag, toCandidatePlaces } from "../api/rag";
 import type { Recommendation } from "../types/place";
 import type { RagResponse } from "../types/rag";
+
+const LEVEL_COLOR: Record<RecommendationLevel, string> = {
+  recommended: "#16a34a",
+  conditional: "#d97706",
+  not_recommended: "#dc2626",
+};
+
+function toMarkers(recs: Recommendation[]): MapMarker[] {
+  return recs
+    .filter((r) => r.lat != null && r.lon != null)
+    .map((r) => ({
+      lat: r.lat as number,
+      lng: r.lon as number,
+      label: `${r.name} (${r.mobility_feasibility_score})`,
+      color: LEVEL_COLOR[r.recommendation_level],
+    }));
+}
 
 export default function RecommendationPage() {
   const [recs, setRecs] = useState<Recommendation[] | null>(null);
@@ -61,7 +80,8 @@ export default function RecommendationPage() {
 
       {recs && recs.length > 0 && (
         <>
-          <p className="text-xs text-stone-400 mb-2">
+          <PlaceMap markers={toMarkers(recs.slice(0, 24))} showLegend />
+          <p className="text-xs text-stone-400 mb-2 mt-3">
             총 {recs.length}곳 중 이동가능성 상위 {Math.min(recs.length, 24)}곳
           </p>
           {recs.slice(0, 24).map((rec) => (

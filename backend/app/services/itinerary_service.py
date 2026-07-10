@@ -64,6 +64,8 @@ def build_itinerary(
                     title=title,
                     place_name=rec.name,
                     category=rec.category,
+                    lat=rec.lat,
+                    lon=rec.lon,
                     reason=reason,
                     is_alternative=is_alt,
                 )

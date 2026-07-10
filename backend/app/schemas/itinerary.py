@@ -20,6 +20,8 @@ class ItinerarySlot(BaseModel):
     title: str
     place_name: str | None = None
     category: str | None = None
+    lat: float | None = None
+    lon: float | None = None
     reason: str
     is_alternative: bool = False  # 날씨로 실외 -> 실내 대체된 슬롯
 

@@ -1,30 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-// 제주국제공항 좌표
-const JEJU_AIRPORT = { lat: 33.5104, lng: 126.4914 };
-const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY as string | undefined;
-
-// Kakao SDK 는 타입이 없어 any 로 접근
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
-
-let sdkPromise: Promise<void> | null = null;
-
-function loadKakaoSdk(key: string): Promise<void> {
-  if (sdkPromise) return sdkPromise;
-  sdkPromise = new Promise((resolve, reject) => {
-    if (window.kakao?.maps) return resolve();
-    const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false`;
-    script.onload = () => window.kakao.maps.load(() => resolve());
-    script.onerror = () => reject(new Error("Kakao SDK 로드 실패"));
-    document.head.appendChild(script);
-  });
-  return sdkPromise;
-}
+import { JEJU_AIRPORT, KAKAO_KEY, loadKakaoSdk } from "../lib/kakao";
 
 export default function AirportKakaoMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -37,10 +12,9 @@ export default function AirportKakaoMap() {
       return;
     }
     let cancelled = false;
-    loadKakaoSdk(KAKAO_KEY)
-      .then(() => {
+    loadKakaoSdk()
+      .then((kakao) => {
         if (cancelled || !mapRef.current) return;
-        const kakao = window.kakao;
         const center = new kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng);
         if (mode === "map") {
           const map = new kakao.maps.Map(mapRef.current, { center, level: 3 });
