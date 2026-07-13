@@ -8,4 +8,6 @@ export interface UserProfile {
   preferred_type: string[];
   departure_time?: string;
   weather_sensitivity: WeatherSensitivity;
+  user_lat?: number | null;
+  user_lon?: number | null;
 }

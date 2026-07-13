@@ -30,6 +30,24 @@ export default function UserConditionForm({
   const [departureTime, setDepartureTime] = useState("18:30");
   const [sensitivity, setSensitivity] = useState<WeatherSensitivity>("high");
   const [travelDate, setTravelDate] = useState("2026-07-10");
+  const [gps, setGps] = useState<{ lat: number; lon: number } | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "ok" | "fail">("idle");
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setGpsStatus("fail");
+      return;
+    }
+    setGpsStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGps({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        setGpsStatus("ok");
+      },
+      () => setGpsStatus("fail"),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
 
   function togglePreferred(value: string) {
     setPreferred((prev) =>
@@ -47,6 +65,8 @@ export default function UserConditionForm({
         preferred_type: preferred,
         departure_time: departureTime,
         weather_sensitivity: sensitivity,
+        user_lat: gps?.lat ?? null,
+        user_lon: gps?.lon ?? null,
       },
       travelDate,
     });
@@ -140,10 +160,30 @@ export default function UserConditionForm({
         })}
       </div>
 
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={useMyLocation}
+          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
+            gpsStatus === "ok"
+              ? "bg-sea-500 border-sea-500 text-white"
+              : "bg-white border-brand-200 text-stone-500 hover:bg-brand-50"
+          }`}
+        >
+          📍 {gpsStatus === "ok" ? "현재 위치 반영됨" : "현재 위치로 추천"}
+        </button>
+        <span className="text-xs text-stone-400">
+          {gpsStatus === "loading" && "위치 확인 중…"}
+          {gpsStatus === "fail" && "위치를 가져오지 못했어요 (공항 기준으로 계산)"}
+          {gpsStatus === "idle" && "누르면 내 위치에서 가까운 순으로 반영해요"}
+          {gpsStatus === "ok" && "내 위치 기준 근접도로 점수를 계산해요"}
+        </span>
+      </div>
+
       <button
         type="submit"
         disabled={loading}
-        className="mt-5 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-bold text-sm transition-colors cursor-pointer"
+        className="mt-4 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-bold text-sm transition-colors cursor-pointer"
       >
         {loading ? "분석 중…" : "이동가능성 추천 받기"}
       </button>

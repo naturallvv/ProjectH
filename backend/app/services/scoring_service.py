@@ -4,7 +4,7 @@
 - 데이터가 없으면(None) 있다고 가정하지 않는다. 가산하지 않고 unknown 으로 남긴다.
 - 모든 점수는 0~100 으로 clamp 한다.
 """
-from app.utils import constants as C
+from app.utils import constants as C, geo
 
 
 def _clamp(value: float) -> int:
@@ -14,12 +14,19 @@ def _clamp(value: float) -> int:
 # ─────────────────────────────────────────────────────────────
 # 접근성 점수
 # ─────────────────────────────────────────────────────────────
+def _graded(count: int | None, present, full: int) -> float:
+    """시설 개수가 있으면 개수로 세분화(1→full-6 … 4↑→full), 없으면 bool 로 판단."""
+    if count is not None:
+        if count <= 0:
+            return 0
+        return min(full, (full - 8) + count * 2)  # full=20: 1→14,2→16,3→18,4↑→20
+    return full if present is True else 0
+
+
 def calculate_accessibility_score(place: dict) -> int:
-    score = 0
-    if place.get("has_accessible_toilet") is True:
-        score += C.ACC_TOILET
-    if place.get("has_accessible_parking") is True:
-        score += C.ACC_PARKING
+    score = 0.0
+    score += _graded(place.get("toilet_count"), place.get("has_accessible_toilet"), C.ACC_TOILET)
+    score += _graded(place.get("parking_count"), place.get("has_accessible_parking"), C.ACC_PARKING)
     if place.get("has_wheelchair_rental") is True:
         score += C.ACC_RENTAL
     if place.get("has_ramp") is True:
@@ -91,16 +98,33 @@ def calculate_weather_risk_score(weather: dict, place: dict) -> int:
 # ─────────────────────────────────────────────────────────────
 # 교통 접근성 점수
 # ─────────────────────────────────────────────────────────────
-def calculate_transport_score(place: dict) -> int:
-    score = 0
+def _proximity_km(
+    place: dict, user_lat: float | None, user_lon: float | None
+) -> float | None:
+    """근접도 계산 기준 거리(km).
+
+    사용자 현재 위치(GPS)가 있으면 그 위치에서 관광지까지 거리를 쓰고,
+    없으면 공항까지 거리로 fallback.
+    """
+    if user_lat is not None and user_lon is not None and place.get("lat") is not None:
+        return geo.haversine_km(user_lat, user_lon, place["lat"], place["lon"])
+    return place.get("distance_to_airport_km")
+
+
+def calculate_transport_score(
+    place: dict, user_lat: float | None = None, user_lon: float | None = None
+) -> int:
+    score = 0.0
     if place.get("near_low_floor_bus") is True:
         score += C.TR_LOW_FLOOR_BUS
         score += C.TR_BUS_STOP  # 저상버스가 있으면 인근 정류장도 있는 것으로 본다
     if place.get("has_accessible_parking") is True:
         score += C.TR_PARKING
-    dist = place.get("distance_to_airport_km")
-    if dist is not None and dist <= C.AIRPORT_NEAR_KM:
-        score += C.TR_AIRPORT_NEAR
+    # 근접도를 연속값으로 반영 (0km→만점, DIST_NORM 이상→0). 사용자 GPS 우선, 없으면 공항 기준.
+    dist = _proximity_km(place, user_lat, user_lon)
+    if dist is not None:
+        d = min(dist, C.AIRPORT_DIST_NORM_KM)
+        score += C.TR_AIRPORT_NEAR * (1 - d / C.AIRPORT_DIST_NORM_KM)
     if place.get("slope_level") == "low":
         score += C.TR_LOW_INTERNAL  # 완만한 경사 = 내부 이동 부담 낮음
     return _clamp(score)
@@ -127,7 +151,7 @@ def calculate_airport_burden_score(
     출도 시각이 이르면 관광 가능 시간이 짧아 이동 압박이 커진다.
     (하루 관광이 실질적으로 어려워지는 정오/오후 3시를 기준으로 판단)
     """
-    score = 0
+    score = 0.0
     dep = _departure_hour(departure_time)
     if dep is not None:
         if dep < 12:
@@ -135,9 +159,11 @@ def calculate_airport_burden_score(
         elif dep < 15:
             score += C.BURDEN_DEP_UNDER_3H
 
+    # 공항까지 거리를 연속값으로 (멀수록 부담↑)
     dist = place.get("distance_to_airport_km")
-    if dist is not None and dist >= C.AIRPORT_FAR_KM:
-        score += C.BURDEN_FAR
+    if dist is not None:
+        d = min(dist, C.AIRPORT_DIST_NORM_KM)
+        score += C.BURDEN_FAR * (d / C.AIRPORT_DIST_NORM_KM)
 
     if calculate_weather_risk_score(weather, place) >= C.ALERT_WIND:
         score += C.BURDEN_WEATHER
@@ -160,11 +186,14 @@ def calculate_mobility_feasibility_score(
     place: dict, weather: dict, user_profile: dict | None = None
 ) -> dict:
     """모든 점수를 계산해 breakdown 딕셔너리로 반환한다."""
-    departure_time = (user_profile or {}).get("departure_time")
+    profile = user_profile or {}
+    departure_time = profile.get("departure_time")
 
     accessibility = calculate_accessibility_score(place)
     weather_risk = calculate_weather_risk_score(weather, place)
-    transport = calculate_transport_score(place)
+    transport = calculate_transport_score(
+        place, profile.get("user_lat"), profile.get("user_lon")
+    )
     airport_burden = calculate_airport_burden_score(place, departure_time, weather)
 
     mobility_raw = (

@@ -42,6 +42,7 @@ BURDEN_WEATHER = 20
 # ── 거리 임계값 (km) ──
 AIRPORT_NEAR_KM = 10.0
 AIRPORT_FAR_KM = 15.0
+AIRPORT_DIST_NORM_KM = 40.0  # 공항 근접/부담 점수를 연속 정규화하는 기준 거리
 
 # ── 이동가능성 가중치 & 분류 임계값 ──
 W_ACCESSIBILITY = 0.45

@@ -46,11 +46,23 @@ def build_itinerary(
     # 날씨가 나쁘면 실내 우선, 아니면 이동가능성 상위 순
     ordered = (indoor + [r for r in visitable if r not in indoor]) if risky else visitable
 
+    # 다양성: 오전/오후를 서로 다른 지역에서 뽑는다 (같은 박물관 군집 방지)
+    def _region(rec) -> str | None:
+        a = rec.address or ""
+        return "서귀포시" if "서귀포" in a else "제주시" if "제주시" in a else None
+
+    morning_rec = ordered[0] if ordered else None
+    afternoon_rec = None
+    if morning_rec:
+        mr = _region(morning_rec)
+        afternoon_rec = next(
+            (r for r in ordered[1:] if _region(r) != mr), None
+        ) or (ordered[1] if len(ordered) > 1 else None)
+
     slots: list[ItinerarySlot] = []
 
-    def make_slot(period: str, time_hint: str, title: str, idx: int) -> None:
-        if idx < len(ordered):
-            rec = ordered[idx]
+    def make_slot(period: str, time_hint: str, title: str, rec) -> None:
+        if rec is not None:
             is_alt = risky and rec.category == "indoor"
             reason = (
                 "기상 위험이 있어 실내 관광지로 배치했습니다."
@@ -80,7 +92,7 @@ def build_itinerary(
                 )
             )
 
-    make_slot("morning", "09:30", "오전 관광", 0)
+    make_slot("morning", "09:30", "오전 관광", morning_rec)
     slots.append(
         ItinerarySlot(
             period="lunch",
@@ -89,7 +101,7 @@ def build_itinerary(
             reason="접근 가능한 식당에서 충분히 휴식한 뒤 오후 일정을 시작하세요.",
         )
     )
-    make_slot("afternoon", "14:00", "오후 관광", 1)
+    make_slot("afternoon", "14:00", "오후 관광", afternoon_rec)
 
     # 공항 조기 이동 권장
     departure = user_profile.departure_time

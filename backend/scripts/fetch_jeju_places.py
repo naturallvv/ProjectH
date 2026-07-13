@@ -95,6 +95,23 @@ def _count_positive(v) -> bool | None:
         return None
 
 
+def _as_int(v) -> int | None:
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _region(addr: str | None) -> str | None:
+    if not addr:
+        return None
+    if "서귀포" in addr:
+        return "서귀포시"
+    if "제주시" in addr:
+        return "제주시"
+    return None
+
+
 def build_places() -> list[dict]:
     lst = _get("getJejuTouristList")
     meta = _get("getJejuTouristMeta")
@@ -130,6 +147,10 @@ def build_places() -> list[dict]:
             "has_wheelchair_rental": _to_bool(r.get("touristLent")),
             "has_nursing_room": _to_bool(r.get("touristNursing")),
             "has_accessible_rest": _to_bool(r.get("touristRest")),
+            # 점수 세분화를 위한 원시 개수 + 지역
+            "toilet_count": _as_int(r.get("toristDtoil")),
+            "parking_count": _as_int(r.get("toruistDpar")),
+            "region": _region(r.get("touristAddr")),
             # GIS 데이터에 없는 항목은 정보 없음(None) 유지
             "has_ramp": None,
             "surface_condition": None,
