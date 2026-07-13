@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage";
 import RecommendationPage from "./pages/RecommendationPage";
 import ItineraryPage from "./pages/ItineraryPage";
 import AirportPage from "./pages/AirportPage";
+import SearchPage from "./pages/SearchPage";
 import DataSourceFooter from "./components/DataSourceFooter";
 
 const navItems = [
@@ -10,6 +11,7 @@ const navItems = [
   { to: "/recommendation", label: "추천", end: false },
   { to: "/itinerary", label: "일정", end: false },
   { to: "/airport", label: "공항 동선", end: false },
+  { to: "/search", label: "검색", end: false },
 ];
 
 export default function App() {
@@ -52,6 +54,7 @@ export default function App() {
           <Route path="/recommendation" element={<RecommendationPage />} />
           <Route path="/itinerary" element={<ItineraryPage />} />
           <Route path="/airport" element={<AirportPage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
       </main>
 
