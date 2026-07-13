@@ -37,8 +37,20 @@ SOURCE_FACILITY = "한국공항공사_제주공항 층별 입점업체 현황"
 SOURCE_MAP = "한국공항공사_제주국제공항 도면 이미지 정보"
 
 
+def _open_csv(path: Path):
+    """UTF-8 우선, 실패 시 cp949 로 CSV 를 연다 (인코딩 무관 견고 처리)."""
+    for enc in ("utf-8-sig", "utf-8", "cp949", "euc-kr"):
+        try:
+            with path.open(encoding=enc) as f:
+                f.read()
+            return path.open(encoding=enc)
+        except UnicodeDecodeError:
+            continue
+    return path.open(encoding="utf-8", errors="replace")
+
+
 def build_facilities() -> int:
-    rows = list(csv.DictReader(TENANT_CSV.open(encoding="cp949")))
+    rows = list(csv.DictReader(_open_csv(TENANT_CSV)))
     out = []
     for i, r in enumerate(rows, 1):
         out.append({
