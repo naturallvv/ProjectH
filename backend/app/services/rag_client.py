@@ -87,9 +87,16 @@ def build_mock_response(payload: RagRequest) -> RagResponse:
     )
 
 
-def _call_external(url: str, payload: RagRequest, timeout: float) -> RagResponse:
+def _call_external(
+    url: str,
+    payload: RagRequest,
+    timeout: float,
+    model_name: str,
+) -> RagResponse:
     """RAG 팀원 서버로 proxy 요청을 보낸다."""
-    resp = requests.post(url, json=payload.model_dump(), timeout=timeout)
+    request_body = payload.model_dump()
+    request_body["model_name"] = payload.model_name or model_name
+    resp = requests.post(url, json=request_body, timeout=timeout)
     resp.raise_for_status()
     data = resp.json()
     data.setdefault("source", "rag-server")
@@ -110,7 +117,12 @@ def get_recommendation(payload: RagRequest) -> RagResponse:
         return build_mock_response(payload)
 
     try:
-        return _call_external(url, payload, settings.rag_timeout_seconds)
+        return _call_external(
+            url,
+            payload,
+            settings.rag_timeout_seconds,
+            settings.rag_model_name,
+        )
     except Exception as exc:  # noqa: BLE001 - 어떤 실패든 mock 으로 폴백
         logger.warning("RAG 서버 호출 실패, mock 으로 fallback: %s", exc)
         return build_mock_response(payload)

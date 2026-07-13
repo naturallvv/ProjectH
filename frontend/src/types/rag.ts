@@ -9,6 +9,7 @@ export interface RagCandidatePlace {
 }
 
 export interface RagRequest {
+  model_name?: string | null;
   user_profile?: Record<string, unknown>;
   weather_summary?: Record<string, unknown>;
   candidate_places: RagCandidatePlace[];
@@ -22,4 +23,29 @@ export interface RagResponse {
   airport_guidance: string;
   cautions: string[];
   source: string;
+}
+
+export interface RetrievedDocument {
+  score: number;
+  doc_id: string;
+  place_name: string | null;
+  category: string | null;
+  risk_level: string | null;
+  text: string;
+  source_type: string | null;
+  source_file: string | null;
+  image_file: string | null;
+  source: string | null;
+}
+
+export interface RagAskRequest {
+  question: string;
+  place_name?: string | null;
+  category?: string | null;
+  top_k?: number;
+}
+
+export interface RagAskResponse {
+  question: string;
+  retrieved_documents: RetrievedDocument[];
 }

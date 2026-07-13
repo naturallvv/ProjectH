@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class RagCandidatePlace(BaseModel):
@@ -16,6 +16,7 @@ class RagCandidatePlace(BaseModel):
 class RagRequest(BaseModel):
     """RAG 팀원 서버로 전달할 근거 데이터 (가이드 §8.1)."""
 
+    model_name: str | None = None
     user_profile: dict[str, Any] | None = None
     weather_summary: dict[str, Any] | None = None
     candidate_places: list[RagCandidatePlace] = []
@@ -31,3 +32,28 @@ class RagResponse(BaseModel):
     airport_guidance: str
     cautions: list[str]
     source: str = "mock"  # mock | rag-server, 응답 출처 표시용
+
+
+class RetrievedDocument(BaseModel):
+    score: float
+    doc_id: str
+    place_name: str | None = None
+    category: str | None = None
+    risk_level: str | None = None
+    text: str
+    source_type: str | None = None
+    source_file: str | None = None
+    image_file: str | None = None
+    source: str | None = None
+
+
+class RagAskRequest(BaseModel):
+    question: str = Field(..., min_length=1)
+    place_name: str | None = None
+    category: str | None = None
+    top_k: int = Field(default=5, ge=1, le=20)
+
+
+class RagAskResponse(BaseModel):
+    question: str
+    retrieved_documents: list[RetrievedDocument]

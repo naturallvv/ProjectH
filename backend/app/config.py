@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # RAG 연동 (별도 팀원 서버). 비어 있으면 mock fallback.
     rag_server_url: str = ""
     rag_timeout_seconds: float = 5.0
+    rag_model_name: str = "kakaocorp/kanana-1.5-8b-instruct-2505"
+    rag_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    rag_vector_store_dir: str = "../vector_store"
 
     # 공공데이터 API 키 (Step 14 실연동)
     kma_api_key: str = ""

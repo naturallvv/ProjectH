@@ -1,5 +1,5 @@
 import { client } from "./client";
-import type { RagRequest, RagResponse } from "../types/rag";
+import type { RagAskRequest, RagAskResponse, RagRequest, RagResponse } from "../types/rag";
 import type { Recommendation } from "../types/place";
 
 const FACT_LABELS: Record<string, string> = {
@@ -33,5 +33,10 @@ export function toCandidatePlaces(recs: Recommendation[]) {
 
 export async function postRag(payload: RagRequest): Promise<RagResponse> {
   const { data } = await client.post<RagResponse>("/api/rag/recommend", payload);
+  return data;
+}
+
+export async function postRagAsk(payload: RagAskRequest): Promise<RagAskResponse> {
+  const { data } = await client.post<RagAskResponse>("/api/rag/ask", payload);
   return data;
 }
