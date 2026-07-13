@@ -21,8 +21,8 @@ RAW = BACKEND / "data" / "raw"
 PROCESSED = BACKEND / "data" / "processed"
 FRONT_PUBLIC = BACKEND.parent / "frontend" / "public" / "airport"
 
-TENANT_CSV = RAW / "한국공항공사_제주공항 층별 입점업체 현황_20250919.csv"
-MAP_DIR = RAW / "한국공항공사_제주국제공항 도면 이미지 정보_20251111"
+TENANT_CSV = RAW / "airport" / "층별_입점업체_현황.csv"
+MAP_DIR = RAW / "airport" / "floor_maps"
 
 # 도면 파일 → (층, 정리된 파일명, 설명)
 FLOOR_IMAGES = [

@@ -19,9 +19,13 @@ from sentence_transformers import SentenceTransformer
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_RAW_DIR = PROJECT_ROOT / "data" / "raw" / "jeju_data"
+# 무장애여행정보 개별 관광지(제주데이터허브) — 데이터 경로 정리 후 위치
+DEFAULT_RAW_DIR = (
+    PROJECT_ROOT / "backend" / "data" / "raw"
+    / "barrier_free_tourism" / "jejudatahub_attractions"
+)
 FALLBACK_RAW_DIR = PROJECT_ROOT / "dataset" / "jeju_files"
-DEFAULT_PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
+DEFAULT_PROCESSED_DIR = PROJECT_ROOT / "backend" / "data" / "processed"
 DEFAULT_VECTOR_DIR = PROJECT_ROOT / "vector_store"
 DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 SOURCE_NAME = "제주데이터허브 무장애여행정보"

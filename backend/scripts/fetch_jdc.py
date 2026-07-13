@@ -43,9 +43,10 @@ def fetch_and_save() -> tuple[bool, str]:
     except Exception as exc:  # noqa: BLE001
         return False, f"실패: {exc}"
 
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    jdc_raw = RAW_DIR / "jdc_dutyfree"
+    jdc_raw.mkdir(parents=True, exist_ok=True)
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    (RAW_DIR / "jdc_brands_raw.txt").write_text(resp.text, encoding="utf-8")
+    (jdc_raw / "jdc_brands_raw.txt").write_text(resp.text, encoding="utf-8")
     (PROCESSED_DIR / "jdc_stores.json").write_text(
         json.dumps([s.model_dump() for s in stores], ensure_ascii=False, indent=2),
         encoding="utf-8",

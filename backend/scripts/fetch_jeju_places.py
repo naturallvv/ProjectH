@@ -117,9 +117,10 @@ def build_places() -> list[dict]:
     meta = _get("getJejuTouristMeta")
     img = _get("getJejuTouristIMG")
 
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    gis_dir = RAW_DIR / "jeju_gis_api"
+    gis_dir.mkdir(parents=True, exist_ok=True)
     for name, data in (("list", lst), ("meta", meta), ("img", img)):
-        (RAW_DIR / f"jeju_tour_{name}_raw.json").write_text(
+        (gis_dir / f"jeju_tour_{name}_raw.json").write_text(
             json.dumps(data, ensure_ascii=False), encoding="utf-8"
         )
 
