@@ -28,7 +28,10 @@ export interface RagResponse {
 export interface RetrievedDocument {
   score: number;
   doc_id: string;
+  place_id: string | null;
   place_name: string | null;
+  lat: number | null;
+  lng: number | null;
   category: string | null;
   risk_level: string | null;
   text: string;

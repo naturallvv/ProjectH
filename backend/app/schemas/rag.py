@@ -37,7 +37,10 @@ class RagResponse(BaseModel):
 class RetrievedDocument(BaseModel):
     score: float
     doc_id: str
+    place_id: str | None = None
     place_name: str | None = None
+    lat: float | None = None
+    lng: float | None = None
     category: str | None = None
     risk_level: str | None = None
     text: str

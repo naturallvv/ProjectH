@@ -61,10 +61,14 @@ class RagRetriever:
         return True
 
     def _format_result(self, score: float, doc: dict[str, Any]) -> dict[str, Any]:
+        place_id = doc.get("place_id")
         return {
             "score": float(score),
             "doc_id": doc.get("doc_id"),
+            "place_id": str(place_id) if place_id is not None else None,
             "place_name": doc.get("place_name"),
+            "lat": doc.get("lat"),
+            "lng": doc.get("lng"),
             "category": doc.get("category"),
             "risk_level": doc.get("risk_level"),
             "text": doc.get("text") or "",
