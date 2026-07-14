@@ -192,7 +192,7 @@ export default function PlannerPage() {
       </p>
 
       {/* 진행 단계 */}
-      <div className="sticky top-14 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 bg-[#fdfaf7]/90 backdrop-blur-sm border-b border-brand-100 mb-4">
+      <div className="sticky top-16 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 bg-[#fdfaf7]/90 backdrop-blur-sm border-b border-brand-100 mb-4">
         <div className="flex gap-1.5 overflow-x-auto">
           {steps.map((s) => (
             <button

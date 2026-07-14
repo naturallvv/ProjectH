@@ -20,6 +20,8 @@
 
   --font-sans: "Pretendard Variable", Pretendard, system-ui,
     "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  /* 표제 전용 — 여행 안내서 느낌의 한글 명조. 히어로·섹션 제목에만 절제해서 사용 */
+  --font-display: "Gowun Batang", "Pretendard Variable", Pretendard, serif;
 
   --shadow-soft: 0 2px 12px rgb(0 0 0 / 0.06);
   --shadow-lift: 0 8px 28px rgb(244 99 58 / 0.14);
@@ -35,4 +37,22 @@ body {
 /* details 마커 제거 (Safari 포함) */
 summary::-webkit-details-marker {
   display: none;
+}
+
+/* 키보드 포커스 — 키보드 이동 시에만 뚜렷한 아웃라인 (마우스 클릭에는 나타나지 않음) */
+:focus-visible {
+  outline: 3px solid var(--color-brand-700);
+  outline-offset: 3px;
+}
+
+/* 시스템에서 '움직임 줄이기'를 켠 경우 전환·애니메이션 제거 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
