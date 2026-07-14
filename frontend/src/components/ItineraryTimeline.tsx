@@ -14,14 +14,14 @@ const PERIOD_ICON: Record<string, string> = {
 export default function ItineraryTimeline({ itinerary }: { itinerary: Itinerary }) {
   const w = itinerary.weather_summary;
 
-  // 장소가 있는 슬롯을 순서대로 마커화 (동선)
+  // 장소가 있는 슬롯을 순서대로 마커화 (동선) — 내가 담은 곳은 브랜드색, 자동 배치는 틸색
   const markers: MapMarker[] = itinerary.slots
     .filter((s) => s.lat != null && s.lon != null && s.place_name)
     .map((s, i) => ({
       lat: s.lat as number,
       lng: s.lon as number,
       label: `${s.place_name}`,
-      color: "#f4633a",
+      color: s.is_user_selected ? "#f4633a" : "#0d9488",
       order: i + 1,
     }));
 
@@ -108,6 +108,11 @@ export default function ItineraryTimeline({ itinerary }: { itinerary: Itinerary 
               {slot.place_name && (
                 <div className="mt-1 text-sm text-stone-700">
                   {slot.place_name}
+                  {slot.is_user_selected && (
+                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-brand-100 text-brand-600 font-bold align-middle">
+                      내가 담은 곳
+                    </span>
+                  )}
                   {slot.is_alternative && (
                     <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold align-middle">
                       날씨 대체

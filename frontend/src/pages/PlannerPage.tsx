@@ -1,12 +1,23 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PlannerConditionBar, { type PlannerValue } from "../components/PlannerConditionBar";
 import PlaceCard from "../components/PlaceCard";
 import PlaceMap, { type MapMarker } from "../components/PlaceMap";
 import RagExplanationBox from "../components/RagExplanationBox";
+import ItineraryTimeline from "../components/ItineraryTimeline";
+import AirportFlowPanel from "../components/AirportFlowPanel";
+import AirportFacilityPanel from "../components/AirportFacilityPanel";
+import JdcStorePanel from "../components/JdcStorePanel";
+import AirportKakaoMap from "../components/AirportKakaoMap";
 import { postRecommendationsFull } from "../api/recommendation";
 import { postRag, toCandidatePlaces } from "../api/rag";
+import { postItinerary } from "../api/itinerary";
+import { postAirportPlan } from "../api/airport";
+import { postRoute, type RouteResponse } from "../api/route";
+import { JEJU_AIRPORT } from "../lib/kakao";
 import type { Recommendation, RecommendationLevel } from "../types/place";
 import type { RagResponse } from "../types/rag";
+import type { Itinerary } from "../types/itinerary";
+import type { AirportPlan } from "../types/airport";
 
 const LEVEL_COLOR: Record<RecommendationLevel, string> = {
   recommended: "#16a34a",
@@ -28,6 +39,10 @@ function toMarkers(recs: Recommendation[]): MapMarker[] {
     }));
 }
 
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export default function PlannerPage() {
   const [conditions, setConditions] = useState<PlannerValue | null>(null);
   const [recs, setRecs] = useState<Recommendation[] | null>(null);
@@ -35,11 +50,37 @@ export default function PlannerPage() {
   const [rag, setRag] = useState<RagResponse | null>(null);
   const [cart, setCart] = useState<Recommendation[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [itinerary, setItinerary] = useState<Itinerary | null>(null);
+  const [airportPlan, setAirportPlan] = useState<AirportPlan | null>(null);
+  const [courseRoute, setCourseRoute] = useState<RouteResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [itinLoading, setItinLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [itinError, setItinError] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const top = (recs ?? []).slice(0, TOP_N);
+
+  // 담은 코스 실도로 경로 미리보기 (마지막은 공항)
+  useEffect(() => {
+    if (cart.length === 0) {
+      setCourseRoute(null);
+      return;
+    }
+    const points = [
+      ...cart
+        .filter((c) => c.lat != null && c.lon != null)
+        .map((c) => ({ lat: c.lat as number, lng: c.lon as number })),
+      { lat: JEJU_AIRPORT.lat, lng: JEJU_AIRPORT.lng },
+    ];
+    if (points.length < 2) {
+      setCourseRoute(null);
+      return;
+    }
+    postRoute(points)
+      .then(setCourseRoute)
+      .catch(() => setCourseRoute(null));
+  }, [cart]);
 
   async function handleSubmit(value: PlannerValue) {
     setLoading(true);
@@ -74,6 +115,35 @@ export default function PlannerPage() {
     }
   }
 
+  async function makeItinerary() {
+    if (!conditions) return;
+    setItinLoading(true);
+    setItinError(null);
+    try {
+      const result = await postItinerary(
+        conditions.profile,
+        conditions.travelDate,
+        cart.map((c) => c.place_id)
+      );
+      setItinerary(result);
+      // 공항 동선도 같은 출도 시간으로 이어서 준비
+      try {
+        setAirportPlan(
+          await postAirportPlan({
+            departure_time: conditions.profile.departure_time ?? "18:30",
+          })
+        );
+      } catch {
+        setAirportPlan(null);
+      }
+      setTimeout(() => scrollToId("step-itinerary"), 100);
+    } catch {
+      setItinError("일정을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setItinLoading(false);
+    }
+  }
+
   function inCart(placeId: string): boolean {
     return cart.some((c) => c.place_id === placeId);
   }
@@ -91,10 +161,27 @@ export default function PlannerPage() {
     cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
+  const courseMarkers: MapMarker[] = cart
+    .filter((c) => c.lat != null && c.lon != null)
+    .map((c, i) => ({
+      id: c.place_id,
+      lat: c.lat as number,
+      lng: c.lon as number,
+      label: c.name,
+      color: "#f4633a",
+      order: i + 1,
+    }));
+
   const steps = [
-    { label: "① 조건·질문", done: conditions !== null },
-    { label: "② 지도에서 추천", done: (recs?.length ?? 0) > 0 },
-    { label: `③ 코스 담기${cart.length ? ` (${cart.length})` : ""}`, done: cart.length > 0 },
+    { id: "step-conditions", label: "① 조건·질문", done: conditions !== null },
+    { id: "step-recs", label: "② 지도에서 추천", done: (recs?.length ?? 0) > 0 },
+    {
+      id: "step-course",
+      label: `③ 코스 담기${cart.length ? ` (${cart.length})` : ""}`,
+      done: cart.length > 0,
+    },
+    { id: "step-itinerary", label: "④ 하루 일정", done: itinerary !== null },
+    { id: "step-airport", label: "⑤ 공항 동선", done: airportPlan !== null },
   ];
 
   return (
@@ -108,19 +195,25 @@ export default function PlannerPage() {
       <div className="sticky top-14 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 bg-[#fdfaf7]/90 backdrop-blur-sm border-b border-brand-100 mb-4">
         <div className="flex gap-1.5 overflow-x-auto">
           {steps.map((s) => (
-            <span
-              key={s.label}
-              className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                s.done ? "bg-brand-500 text-white" : "bg-white border border-brand-100 text-stone-400"
+            <button
+              type="button"
+              key={s.id}
+              onClick={() => scrollToId(s.id)}
+              className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                s.done
+                  ? "bg-brand-500 text-white"
+                  : "bg-white border border-brand-100 text-stone-400 hover:text-brand-500"
               }`}
             >
               {s.label}
-            </span>
+            </button>
           ))}
         </div>
       </div>
 
-      <PlannerConditionBar onSubmit={handleSubmit} loading={loading} />
+      <div id="step-conditions">
+        <PlannerConditionBar onSubmit={handleSubmit} loading={loading} />
+      </div>
 
       {error && (
         <div className="rounded-2xl border border-red-200 bg-red-50 text-red-600 text-sm p-4 mb-4">
@@ -128,8 +221,9 @@ export default function PlannerPage() {
         </div>
       )}
 
+      {/* ② 지도 추천 */}
       {recs && recs.length > 0 && (
-        <section>
+        <section id="step-recs" className="scroll-mt-28">
           {conditions?.query && (
             <p className="text-xs text-stone-500 mb-2">
               {queryApplied ? (
@@ -196,6 +290,127 @@ export default function PlannerPage() {
         </section>
       )}
 
+      {/* ③ 담은 코스 → 일정 만들기 */}
+      {recs && recs.length > 0 && (
+        <section id="step-course" className="scroll-mt-28 mt-8">
+          <h2 className="text-lg font-extrabold text-stone-800 mb-2">
+            ③ 담은 코스 {cart.length > 0 ? `${cart.length}곳` : ""}
+          </h2>
+          {cart.length > 0 ? (
+            <>
+              <PlaceMap
+                markers={courseMarkers}
+                connect
+                routePath={courseRoute?.source === "kakao" ? courseRoute.path : undefined}
+                showAirport
+                height="20rem"
+              />
+              <p className="text-[11px] text-stone-400 mt-1 mb-3">
+                숫자 = 담은 순서 · ✈ = 공항
+                {courseRoute?.source === "kakao" && courseRoute.distance_m != null && (
+                  <span className="text-brand-500 font-semibold">
+                    {" "}
+                    · 총 이동 {(courseRoute.distance_m / 1000).toFixed(1)}km ·{" "}
+                    {Math.round((courseRoute.duration_s ?? 0) / 60)}분 (실도로)
+                  </span>
+                )}
+              </p>
+              <ol className="m-0 mb-3 pl-0 list-none space-y-1.5">
+                {cart.map((c, i) => (
+                  <li
+                    key={c.place_id}
+                    className="flex items-center gap-2 bg-white rounded-xl border border-brand-100 px-3 py-2"
+                  >
+                    <span className="grid place-items-center w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-extrabold shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm font-semibold text-stone-700 flex-1 min-w-0 truncate">
+                      {c.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleCart(c)}
+                      className="text-xs font-semibold text-stone-400 hover:text-red-500 cursor-pointer shrink-0"
+                    >
+                      빼기
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : (
+            <p className="text-sm text-stone-400 mb-3">
+              아직 담은 곳이 없어요. 담지 않고 일정을 만들면 오늘 조건에 맞춰 자동으로
+              배치해 드려요.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={makeItinerary}
+            disabled={itinLoading || !conditions}
+            className="px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-bold text-sm transition-colors cursor-pointer"
+          >
+            {itinLoading
+              ? "일정 만드는 중…"
+              : itinerary
+                ? "📅 이 코스로 일정 다시 만들기"
+                : "📅 이 코스로 하루 일정 만들기"}
+          </button>
+          {itinError && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 text-red-600 text-sm p-4 mt-3">
+              {itinError}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ④ 하루 일정 */}
+      {itinerary && (
+        <section id="step-itinerary" className="scroll-mt-28 mt-8">
+          <h2 className="text-lg font-extrabold text-stone-800 mb-2">④ 하루 일정</h2>
+          <ItineraryTimeline itinerary={itinerary} />
+        </section>
+      )}
+
+      {/* ⑤ 공항 출도 동선 — 실내는 도면, 카카오맵은 보조 */}
+      {airportPlan && (
+        <section id="step-airport" className="scroll-mt-28 mt-8">
+          <h2 className="text-lg font-extrabold text-stone-800 mb-2">⑤ 공항 출도 동선</h2>
+          <AirportFlowPanel
+            arrivalTime={airportPlan.recommended_airport_arrival_time}
+            reason={airportPlan.reason}
+            floorMaps={airportPlan.airport_floor_maps}
+          />
+
+          {/* 공항 내부는 카카오맵에 없으므로 위 층별 도면이 기본, 외부 지도는 접힘 */}
+          <details className="group mb-6">
+            <summary className="cursor-pointer list-none text-xs font-semibold text-brand-500 hover:text-brand-600 select-none">
+              🚗 공항까지 가는 길 보기 (카카오맵·로드뷰){" "}
+              <span className="inline-block transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <div className="mt-3">
+              <AirportKakaoMap />
+            </div>
+          </details>
+
+          <AirportFacilityPanel facilities={airportPlan.airport_facilities} />
+          <JdcStorePanel stores={airportPlan.jdc_stores} />
+
+          {/* 주의사항 — 접기 (삭제 금지 고지) */}
+          <details className="group mt-6">
+            <summary className="cursor-pointer list-none text-xs font-semibold text-stone-400 hover:text-stone-500 select-none">
+              이용 시 주의사항{" "}
+              <span className="inline-block transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <ul className="mt-2 mb-0 pl-4 space-y-0.5 text-xs text-stone-400">
+              {airportPlan.cautions.map((c, i) => (
+                <li key={i}>{c}</li>
+              ))}
+            </ul>
+          </details>
+        </section>
+      )}
+
       {/* 담은 코스 요약 (하단 고정) */}
       {cart.length > 0 && (
         <div className="sticky bottom-3 z-10 mt-4">
@@ -206,6 +421,13 @@ export default function PlannerPage() {
             <span className="text-xs text-stone-400 flex-1 min-w-0 truncate">
               {cart.map((c) => c.name).join(" → ")}
             </span>
+            <button
+              type="button"
+              onClick={() => scrollToId("step-course")}
+              className="px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold cursor-pointer"
+            >
+              코스 보기
+            </button>
             <button
               type="button"
               onClick={() => setCart([])}
