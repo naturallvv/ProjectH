@@ -44,6 +44,10 @@ AIRPORT_NEAR_KM = 10.0
 AIRPORT_FAR_KM = 15.0
 AIRPORT_DIST_NORM_KM = 40.0  # 공항 근접/부담 점수를 연속 정규화하는 기준 거리
 
+# ── 자연어 질의 추천 ──
+QUERY_RELEVANCE_WEIGHT = 0.35  # 결합 랭킹에서 질의 관련도 비중 (나머지는 이동가능성)
+QUERY_TOP_K_DOCS = 40          # 질의당 검색할 무장애 문서 수
+
 # ── 이동가능성 가중치 & 분류 임계값 ──
 W_ACCESSIBILITY = 0.45
 W_TRANSPORT = 0.25

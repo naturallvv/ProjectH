@@ -30,3 +30,8 @@ class Recommendation(BaseModel):
     recommendation_level: RecommendationLevel
     warnings: list[str] = []
     facts: PlaceFacts
+    # 자연어 질의 관련도(0~100, 질의 없거나 미매칭이면 None)와 근거 문서 스니펫
+    relevance_score: int | None = None
+    match_reason: list[str] = []
+    # 제주데이터허브 무장애여행정보 원문 스니펫 (없는 장소는 빈 목록)
+    barrier_free_info: list[str] = []
