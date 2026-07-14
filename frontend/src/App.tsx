@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
+import PlannerPage from "./pages/PlannerPage";
 import RecommendationPage from "./pages/RecommendationPage";
 import ItineraryPage from "./pages/ItineraryPage";
 import AirportPage from "./pages/AirportPage";
@@ -8,6 +9,7 @@ import DataSourceFooter from "./components/DataSourceFooter";
 
 const navItems = [
   { to: "/", label: "홈", end: true },
+  { to: "/planner", label: "여행 플래너", end: false },
   { to: "/recommendation", label: "추천", end: false },
   { to: "/itinerary", label: "일정", end: false },
   { to: "/airport", label: "공항 동선", end: false },
@@ -51,6 +53,7 @@ export default function App() {
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/planner" element={<PlannerPage />} />
           <Route path="/recommendation" element={<RecommendationPage />} />
           <Route path="/itinerary" element={<ItineraryPage />} />
           <Route path="/airport" element={<AirportPage />} />
