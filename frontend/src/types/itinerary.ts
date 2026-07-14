@@ -8,12 +8,14 @@ export interface ItinerarySlot {
   period: string;
   time_hint: string;
   title: string;
+  place_id?: string | null;
   place_name: string | null;
   category: string | null;
   lat?: number | null;
   lon?: number | null;
   reason: string;
   is_alternative: boolean;
+  is_user_selected?: boolean;
 }
 
 export interface EarlyDeparture {

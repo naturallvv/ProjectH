@@ -8,4 +8,6 @@ router = APIRouter(prefix="/api", tags=["itinerary"])
 
 @router.post("/itinerary", response_model=ItineraryResponse)
 def build(payload: ItineraryRequest) -> ItineraryResponse:
-    return itinerary_service.build_itinerary(payload.user_profile, payload.travel_date)
+    return itinerary_service.build_itinerary(
+        payload.user_profile, payload.travel_date, payload.selected_place_ids
+    )
