@@ -19,10 +19,10 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { no: 1, title: "조건 입력", desc: "휠체어 종류·출도 시간 등" },
-  { no: 2, title: "점수 분석", desc: "접근성 × 날씨 × 교통" },
-  { no: 3, title: "일정 확인", desc: "오전·오후·출도 전 코스" },
-  { no: 4, title: "공항 동선", desc: "도착 시간·시설·면세점" },
+  { no: 1, title: "질문·조건 입력", desc: "\"바다 보이는 산책로\" 처럼 편하게" },
+  { no: 2, title: "지도에서 추천", desc: "무장애 정보 × 접근성 × 날씨" },
+  { no: 3, title: "코스 담기·일정", desc: "가고 싶은 곳을 담으면 하루 일정으로" },
+  { no: 4, title: "공항 동선", desc: "층별 도면·도착 시간·면세점" },
 ];
 
 export default function HomePage() {
@@ -48,16 +48,10 @@ export default function HomePage() {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
-              to="/recommendation"
+              to="/planner"
               className="no-underline px-6 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold shadow-[var(--shadow-lift)] transition-colors"
             >
-              이동가능성 추천 받기 →
-            </Link>
-            <Link
-              to="/airport"
-              className="no-underline px-6 py-3 rounded-2xl bg-white hover:bg-brand-50 text-brand-600 font-bold border border-brand-200 transition-colors"
-            >
-              공항 동선 보기
+              여행 플래너 시작하기 →
             </Link>
           </div>
           <p className="mt-6 text-xs text-stone-400">
@@ -112,7 +106,7 @@ export default function HomePage() {
             입력부터 추천까지 30초면 충분해요.
           </p>
           <Link
-            to="/recommendation"
+            to="/planner"
             className="no-underline inline-block px-6 py-3 rounded-2xl bg-white text-brand-600 font-bold hover:bg-brand-50 transition-colors"
           >
             무료로 시작하기

@@ -1,19 +1,11 @@
-import { NavLink, Route, Routes } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import PlannerPage from "./pages/PlannerPage";
-import RecommendationPage from "./pages/RecommendationPage";
-import ItineraryPage from "./pages/ItineraryPage";
-import AirportPage from "./pages/AirportPage";
-import SearchPage from "./pages/SearchPage";
 import DataSourceFooter from "./components/DataSourceFooter";
 
 const navItems = [
   { to: "/", label: "홈", end: true },
   { to: "/planner", label: "여행 플래너", end: false },
-  { to: "/recommendation", label: "추천", end: false },
-  { to: "/itinerary", label: "일정", end: false },
-  { to: "/airport", label: "공항 동선", end: false },
-  { to: "/search", label: "검색", end: false },
 ];
 
 export default function App() {
@@ -54,10 +46,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/planner" element={<PlannerPage />} />
-          <Route path="/recommendation" element={<RecommendationPage />} />
-          <Route path="/itinerary" element={<ItineraryPage />} />
-          <Route path="/airport" element={<AirportPage />} />
-          <Route path="/search" element={<SearchPage />} />
+          {/* 구 탭 경로는 플래너로 통합됨 — 북마크 호환 리다이렉트 */}
+          <Route path="/recommendation" element={<Navigate to="/planner" replace />} />
+          <Route path="/itinerary" element={<Navigate to="/planner" replace />} />
+          <Route path="/airport" element={<Navigate to="/planner" replace />} />
+          <Route path="/search" element={<Navigate to="/planner" replace />} />
         </Routes>
       </main>
 
